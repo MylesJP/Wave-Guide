@@ -23,7 +23,8 @@ p {
 }
 
 h1 {
-  font-size: 6rem;
+  font-size: 3rem;
+  display:inline;
 }
 
 h2 {
@@ -35,11 +36,11 @@ h2 {
   width: 100%;
   height: 100vh;
   position: relative;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0,0,0,0.5);
   color: white;
 }
 
-.app:before{
+.app::before{
   content: '';
   background: url('./assets/waves-bg.jpg') no-repeat center center/cover;
   position: absolute;
@@ -55,7 +56,14 @@ h2 {
   font-size: 18px;
 }
 
-.fa-search:hover, .fa-times:hover {
+.fa-heart {
+  font-size: 2.5rem;
+  margin-right: 1rem;
+  line-height: 1rem;
+  margin-bottom: 4px;
+}
+
+.fa-search:hover, .fa-times:hover, .fa-heart:hover {
   cursor: pointer;
 }
 
@@ -68,7 +76,7 @@ h2 {
   justify-content: space-between;
   max-width: 300px;
   border-radius: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1.7px solid rgba(255, 255, 255, 1.0);
   background: rgba(255, 255, 255, 0.1)  
 }
 
@@ -88,7 +96,6 @@ input {
 
 .container {
   max-width: 700px;
-  height: 700px;
   margin: auto;
   padding: 0 1rem;
   position: relative;
@@ -103,13 +110,13 @@ input {
   margin: 1rem auto;
 }
 
-.description {
-  position: relative;
-  right: -90%;
-  transform-origin: 0 0;
-  transform: rotate(270deg);
-}
-
-.time {
-  padding-bottom: 9px;
+.thirtysix-hour, .bottom {
+  display: flex;
+  justify-content: space-evenly;
+  text-align: center;
+  width: 100%;
+  margin: 1rem auto;
+  padding: 1rem;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.2);
 }
