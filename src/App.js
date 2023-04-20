@@ -1,4 +1,5 @@
 import SearchBar from "./components/SearchBar";
+import Faves from "./components/Faves";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from '@fortawesome/free-regular-svg-icons'
@@ -28,6 +29,9 @@ function App() {
             setLocation={setLocation}
             clickFunctions={clickFunctions}
           />
+        </div>
+        <div className="faves">
+          <Faves/>
         </div>
         <div className="top">
           <div className="location">
