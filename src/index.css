@@ -1,3 +1,9 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +16,100 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+p {
+  font-size: 1.6rem;
+}
+
+h1 {
+  font-size: 6rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin: 1rem auto -0.5rem 0rem;
+}
+
+.app {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background-color: rgba(0,0,0,0.4);
+  color: white;
+}
+
+.app:before{
+  content: '';
+  background: url('./assets/waves-bg.jpg') no-repeat center center/cover;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+/* Customize the icons in the search bar */
+.fa-search, .fa-times {
+  font-size: 18px;
+}
+
+.fa-search:hover, .fa-times:hover {
+  cursor: pointer;
+}
+
+.app .search {
+  display: flex;
+  align-items: center;
+  margin: 0 auto 50px auto;
+  width: 80%;
+  padding: 1rem;
+  justify-content: space-between;
+  max-width: 300px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1)  
+}
+
+input {
+  margin: 0 0.5rem 0 0.5rem;
+  width: 100%;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 1.3rem;
+  background: rgba(255, 255, 255, 0)  
+}
+
+::placeholder {
+  color:  rgba(255, 255, 255, 0.6)  
+} 
+
+.container {
+  max-width: 700px;
+  height: 700px;
+  margin: auto;
+  padding: 0 1rem;
+  position: relative;
+  top: 3%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.top {
+  width: 100%;
+  margin: 1rem auto;
+}
+
+.description {
+  position: relative;
+  right: -90%;
+  transform-origin: 0 0;
+  transform: rotate(270deg);
+}
+
+.time {
+  padding-bottom: 9px;
 }
