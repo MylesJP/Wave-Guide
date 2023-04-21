@@ -23,7 +23,7 @@ p {
 }
 
 h1 {
-  font-size: 2.5rem;
+  font-size: 2.1rem;
   display:inline;
 }
 
@@ -33,7 +33,9 @@ h2 {
 }
 
 h3 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .app {
@@ -60,16 +62,28 @@ h3 {
   font-size: 18px;
 }
 
-.fa-triangle-exclamation {
+.fa-triangle-exclamation{
   font-size: 30px;
   display: inline;
 }
 
 .fa-heart {
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-right: 1rem;
   line-height: 1rem;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.fa-water {
+  font-size: 1.3rem;
+  margin-left: 1rem;
+  margin-right: 0.2rem;
+}
+
+.fa-wind {
+  font-size: 1.3rem;
+  margin-left: 0.7rem;
+  margin-right: 0.2rem;
 }
 
 .fa-search:hover, .fa-times:hover, .fa-heart:hover {
@@ -80,10 +94,10 @@ h3 {
   display: flex;
   align-items: center;
   margin: 0 auto .8rem auto;
-  width: 80%;
-  padding: .8rem;
+  width: 85%;
+  padding: 1rem;
   justify-content: space-between;
-  max-width: 300px;
+  max-width: 400px;
   border-radius: 25px;
   border: 1.7px solid rgba(255, 255, 255, 1.0);
   background: rgba(255, 255, 255, 0.1)  
@@ -119,16 +133,11 @@ input {
   margin: 1.3rem auto;
 }
 
-.thirtysix-hour, .bottom {
-  display: flex;
-  justify-content: space-evenly;
-  text-align: center;
-  width: 100%;
-  margin: 1rem auto;
-  padding: 1rem;
-  border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.2);
+.location{
+  margin-bottom: 2rem;
 }
+
+
 
 .favebox {
   margin: 1rem;
@@ -181,7 +190,7 @@ input {
 
 #temp {
   display: inline;
-  margin-left: 2rem;
+  margin-left: 0rem;
   font-size: 1.5rem;
 }
 

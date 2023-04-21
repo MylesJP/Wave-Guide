@@ -4,7 +4,11 @@ import ThreeDays from "./components/ThreeDays";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
-import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTriangleExclamation,
+  faWater,
+  faWind,
+} from "@fortawesome/free-solid-svg-icons";
 import CurrentConditions from "./components/CurrentConditions";
 
 function App() {
@@ -13,14 +17,14 @@ function App() {
   const [forecastData, setforecastData] = useState({});
 
   function clickFunctions() {
-    //searchLocation() TODO
+    searchLocation();
     //getForecast() TODO
     console.log({ location }.location);
   }
 
   const searchLocation = () => {
     // This will be where the microservice passes me information
-    console.log("location goes here");
+    console.log(`Searching for ${location}`);
   };
 
   return (
@@ -40,9 +44,11 @@ function App() {
           <div className="location">
             <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
             <h1>Tofino, BC</h1>
+            <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
+            <p id="temp">8°C</p>
+            <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
             <p id="temp">22°C</p>
           </div>
-          <div className="temp"></div>
           <div className="warning">
             <FontAwesomeIcon icon={faTriangleExclamation} style={{ color: "#ffae00" }} />
             <p id="warning">Dangerous conditions reported.</p>
@@ -56,7 +62,9 @@ function App() {
         </div>
       </div>
       <div className="feedback">
-        <p><i>Feedback</i></p>
+        <p>
+          <i>Feedback</i>
+        </p>
       </div>
     </div>
   );
