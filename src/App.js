@@ -16,6 +16,13 @@ function App() {
   const [data, setData] = useState({});
   const [forecastData, setforecastData] = useState({});
 
+  const sendEmail = () => {
+    const confirmed = window.confirm("Open email client to email developer?");
+    if (confirmed) {
+      window.location.href = "mailto:pennermy@oregonstate.edu";
+    }
+  };
+
   function clickFunctions() {
     searchLocation();
     //getForecast() TODO
@@ -62,9 +69,7 @@ function App() {
         </div>
       </div>
       <div className="feedback">
-        <p>
-          <i>Feedback</i>
-        </p>
+        <button onClick={sendEmail}>Feedback</button>
       </div>
     </div>
   );
