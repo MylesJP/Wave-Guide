@@ -17,7 +17,7 @@ export default function SearchBar({ location, setLocation, clickFunctions }) {
         type="text"
         onKeyDown={searchOnEnter}
         onChange={(event) => setLocation(event.target.value)}
-        placeholder="Enter Location or lat/long"
+        placeholder="Enter location or lat/long"
       />
       {shouldDisplayClear && (
         <div className="fa fa-times" onClick={() => setLocation("")}></div>

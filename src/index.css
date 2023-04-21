@@ -19,7 +19,7 @@ code {
 }
 
 p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 h1 {
@@ -75,13 +75,13 @@ h3 {
 }
 
 .fa-water {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   margin-left: 1rem;
   margin-right: 0.2rem;
 }
 
 .fa-wind {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   margin-left: 0.7rem;
   margin-right: 0.2rem;
 }
@@ -192,7 +192,7 @@ input {
 #temp {
   display: inline;
   margin-left: 0rem;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
 }
 
 .current-cond-container{
