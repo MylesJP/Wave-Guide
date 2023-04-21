@@ -55,6 +55,9 @@ function App() {
           <ThreeDays />
         </div>
       </div>
+      <div className="feedback">
+        <p><i>Feedback</i></p>
+      </div>
     </div>
   );
 }

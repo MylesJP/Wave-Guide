@@ -191,4 +191,11 @@ input {
 
 .three-day-container {
   margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.feedback {
+  text-align: center;
+  text-decoration: underline;
+  padding-bottom: 1rem;
 }
