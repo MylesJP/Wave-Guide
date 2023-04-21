@@ -1,6 +1,7 @@
 import React from "react";
 
 export default function Faves() {
+  // Probably needs to be handled with an array that can auto populate
   return (
     <>
       <div className="favebox">
