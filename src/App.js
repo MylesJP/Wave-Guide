@@ -10,6 +10,11 @@ import {
   faWind,
 } from "@fortawesome/free-solid-svg-icons";
 import CurrentConditions from "./components/CurrentConditions";
+import axios from "axios";
+
+const API_KEY =
+  "b6b2605c-dfec-11ed-bce5-0242ac130002-b6b26124-dfec-11ed-bce5-0242ac130002";
+const endpoint = "https://api.stormglass.io/v2/weather/point";
 
 function App() {
   const [location, setLocation] = useState("");
@@ -25,8 +30,27 @@ function App() {
 
   function clickFunctions() {
     searchLocation();
-    //getForecast() TODO
-    console.log({ location }.location);
+    callStormglass();
+  }
+
+  function callStormglass() {
+    axios
+      .get(endpoint, {
+        params: {
+          lat: 49.1198,
+          lng: -125.8988,
+          params: "windSpeed",
+        },
+        headers: {
+          Authorization: API_KEY,
+        },
+      })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   const searchLocation = () => {
