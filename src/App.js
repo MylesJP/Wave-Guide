@@ -20,6 +20,7 @@ function App() {
   const [location, setLocation] = useState("");
   const [data, setData] = useState({});
   const [forecastData, setforecastData] = useState({});
+  const [searchString, setsearchString] = useState("");
 
   const sendEmail = () => {
     const confirmed = window.confirm("Open email client to email developer?");
@@ -28,17 +29,36 @@ function App() {
     }
   };
 
+  const geocoding = async () => {
+    // I pass my partner a search term string and he returns a pair of lat/long coords
+    // Note that the results from Mapbox are sorted by relevance
+    if (location){
+      axios
+        .get(
+          `https://mapbox-api.onrender.com/get/${location}`
+        )
+        .then((response) => {
+          console.log(response.data);
+          setsearchString(response.data.text)
+        })
+        .catch(error => {
+          console.log(error)
+      });
+    }
+  };
+
   function clickFunctions() {
     searchLocation();
-    callStormglass();
+    // callStormglass();
+    geocoding();
   }
 
   function callStormglass() {
     axios
       .get(endpoint, {
         params: {
-          lat: 49.1198,
-          lng: -125.8988,
+          lat: 49.122754,
+          lng: -125.895136,
           params: "windSpeed",
         },
         headers: {
@@ -74,7 +94,7 @@ function App() {
         <div className="top">
           <div className="location">
             <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
-            <h1>Tofino, BC</h1>
+            <h1>{searchString}</h1>
             <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
             <p id="temp">8°C</p>
             <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
