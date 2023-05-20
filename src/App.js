@@ -1,7 +1,7 @@
 import SearchBar from "./components/SearchBar";
 import Faves from "./components/Faves";
 import ThreeDays from "./components/ThreeDays";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import {
@@ -12,8 +12,7 @@ import {
 import CurrentConditions from "./components/CurrentConditions";
 import axios from "axios";
 
-const API_KEY =
-  "b6b2605c-dfec-11ed-bce5-0242ac130002-b6b26124-dfec-11ed-bce5-0242ac130002";
+const apiKey = process.env.REACT_APP_STORMGLASS_API_KEY;
 const endpoint = "https://api.stormglass.io/v2/weather/point";
 
 function App() {
@@ -21,6 +20,8 @@ function App() {
   const [data, setData] = useState({});
   const [forecastData, setforecastData] = useState({});
   const [searchString, setsearchString] = useState("");
+  const [searchLat, setsearchLat] = useState("");
+  const [searchLong, setsearchLong] = useState("");
 
   const sendEmail = () => {
     const confirmed = window.confirm("Open email client to email developer?");
@@ -29,40 +30,49 @@ function App() {
     }
   };
 
-  const geocoding = async () => {
-    // I pass my partner a search term string and he returns a pair of lat/long coords
-    // Note that the results from Mapbox are sorted by relevance
-    if (location){
-      axios
-        .get(
-          `https://mapbox-api.onrender.com/get/${location}`
-        )
-        .then((response) => {
-          console.log(response.data);
-          setsearchString(response.data.text)
-        })
-        .catch(error => {
-          console.log(error)
-      });
-    }
-  };
-
-  function clickFunctions() {
-    searchLocation();
-    // callStormglass();
-    geocoding();
+  async function clickFunctions() {
+    await geocoding();
+    // callStormglass(searchLat, searchLong);
   }
 
-  function callStormglass() {
+  async function geocoding() {
+    // I pass my partner a search term string and he returns a pair of lat/long coords
+    // Note that the results from Mapbox are sorted by relevance
+    if (location) {
+      await axios
+        .get(`https://mapbox-api.onrender.com/get/${location}`)
+        .then((response) => {
+          console.log(response.data);
+          setsearchString(response.data.text);
+          setsearchLong(response.data.center[0]);
+          setsearchLat(response.data.center[1]);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }
+
+  useEffect(() => {
+    if (searchLat && searchLong) {
+      callStormglass(searchLat, searchLong);
+    }
+  }, [searchLat, searchLong]);
+
+  async function callStormglass(searchLat, searchLong) {
+    console.log("stormglass called");
+    console.log(searchLat);
+    console.log(searchLong);
+    console.log(apiKey);
     axios
       .get(endpoint, {
         params: {
-          lat: 49.122754,
-          lng: -125.895136,
-          params: "windSpeed",
+          lat: searchLat,
+          lng: searchLong,
+          params: "windSpeed,airTemperature,waterTemperature,waveHeight",
         },
         headers: {
-          Authorization: API_KEY,
+          Authorization: apiKey,
         },
       })
       .then((response) => {
@@ -72,11 +82,6 @@ function App() {
         console.log(error);
       });
   }
-
-  const searchLocation = () => {
-    // This will be where the microservice passes me information
-    console.log(`Searching for ${location}`);
-  };
 
   return (
     <div className="app">
@@ -100,10 +105,10 @@ function App() {
             <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
             <p id="temp">22°C</p>
           </div>
-          <div className="warning">
+          {/* <div className="warning">
             <FontAwesomeIcon icon={faTriangleExclamation} style={{ color: "#ffae00" }} />
             <p id="warning">Dangerous conditions reported.</p>
-          </div>
+          </div> */}
         </div>
         <div className="current-cond-container">
           <CurrentConditions />
