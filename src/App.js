@@ -18,10 +18,10 @@ const endpoint = "https://api.stormglass.io/v2/weather/point";
 function App() {
   const [location, setLocation] = useState("");
   const [data, setData] = useState({});
-  const [forecastData, setforecastData] = useState({});
   const [searchString, setsearchString] = useState("");
   const [searchLat, setsearchLat] = useState("");
   const [searchLong, setsearchLong] = useState("");
+  const [tempData, settempData] = useState([]);
 
   const sendEmail = () => {
     const confirmed = window.confirm("Open email client to email developer?");
@@ -32,12 +32,10 @@ function App() {
 
   async function clickFunctions() {
     await geocoding();
-    // callStormglass(searchLat, searchLong);
   }
 
   async function geocoding() {
     // I pass my partner a search term string and he returns a pair of lat/long coords
-    // Note that the results from Mapbox are sorted by relevance
     if (location) {
       await axios
         .get(`https://mapbox-api.onrender.com/get/${location}`)
@@ -60,10 +58,8 @@ function App() {
   }, [searchLat, searchLong]);
 
   async function callStormglass(searchLat, searchLong) {
-    console.log("stormglass called");
     console.log(searchLat);
     console.log(searchLong);
-    console.log(apiKey);
     axios
       .get(endpoint, {
         params: {
@@ -77,6 +73,20 @@ function App() {
       })
       .then((response) => {
         console.log(response.data);
+
+        const temperatures = response.data.hours.filter((hour) => {
+          const date = new Date(hour.time);
+          return date.getUTCHours() === 15;  // 3pm for now but could modify for current time
+        })
+        .map(hour => {
+          return {
+            time: hour.time,
+            airTemp: hour.airTemperature,
+            waterTemp: hour.waterTemperature            
+          }
+        })
+        settempData(temperatures)
+        console.log(tempData)
       })
       .catch((error) => {
         console.log(error);
@@ -101,9 +111,9 @@ function App() {
             <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
             <h1>{searchString}</h1>
             <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
-            <p id="temp">8°C</p>
+            <p id="temp">{tempData[2]}</p>
             <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
-            <p id="temp">22°C</p>
+            <p id="temp">{tempData[1]}</p>
           </div>
           {/* <div className="warning">
             <FontAwesomeIcon icon={faTriangleExclamation} style={{ color: "#ffae00" }} />
