@@ -4,11 +4,7 @@ import ThreeDays from "./components/ThreeDays";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
-import {
-  faTriangleExclamation,
-  faWater,
-  faWind,
-} from "@fortawesome/free-solid-svg-icons";
+import { faWater, faWind } from "@fortawesome/free-solid-svg-icons";
 import CurrentConditions from "./components/CurrentConditions";
 import axios from "axios";
 
@@ -22,6 +18,7 @@ function App() {
   const [searchLat, setsearchLat] = useState("");
   const [searchLong, setsearchLong] = useState("");
   const [tempData, settempData] = useState([]);
+  const [favourites, setFavourites] = useState(JSON.parse(localStorage.getItem('favourites')) || []);
 
   const sendEmail = () => {
     const confirmed = window.confirm("Open email client to email developer?");
@@ -29,6 +26,26 @@ function App() {
       window.location.href = "mailto:pennermy@oregonstate.edu";
     }
   };
+
+  function addToFavourites() {
+    // Check if location is already in favorites
+    if (!favourites.includes(location)) {
+      // If not, add it
+      const newFavourites = [...favourites, location];
+  
+      // But check if there are already three favorites
+      if (newFavourites.length > 3) {
+        // If so, remove the first element from the array
+        newFavourites.shift();
+      }
+  
+      // Update state
+      setFavourites(newFavourites);
+  
+      // Update localStorage
+      localStorage.setItem('favourites', JSON.stringify(newFavourites));
+    }
+  }
 
   async function clickFunctions() {
     await geocoding();
@@ -73,23 +90,26 @@ function App() {
       })
       .then((response) => {
         console.log(response.data);
-
-        const temperatures = response.data.hours.filter((hour) => {
-          const date = new Date(hour.time);
-          return date.getUTCHours() === 15;  // 3pm for now but could modify for current time
-        })
-        .map(hour => {
-          return {
-            time: hour.time,
-            airTemp: hour.airTemperature,
-            waterTemp: hour.waterTemperature            
-          }
-        })
-        settempData(temperatures)
-        console.log(tempData)
+        const temperatures = extractTemperatures(response.data.hours);
+        setData(temperatures);
       })
       .catch((error) => {
         console.log(error);
+      });
+  }
+
+  function extractTemperatures(hours) {
+    return hours
+      .filter((hour) => {
+        const date = new Date(hour.time);
+        return date.getUTCHours() === 15;
+      })
+      .map((hour) => {
+        return {
+          time: hour.time,
+          airTemperature: hour.airTemperature,
+          waterTemperature: hour.waterTemperature,
+        };
       });
   }
 
@@ -106,6 +126,8 @@ function App() {
         <div className="faves">
           <Faves />
         </div>
+        {location && (
+        <>
         <div className="top">
           <div className="location">
             <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
@@ -115,10 +137,6 @@ function App() {
             <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
             <p id="temp">{tempData[1]}</p>
           </div>
-          {/* <div className="warning">
-            <FontAwesomeIcon icon={faTriangleExclamation} style={{ color: "#ffae00" }} />
-            <p id="warning">Dangerous conditions reported.</p>
-          </div> */}
         </div>
         <div className="current-cond-container">
           <CurrentConditions />
@@ -126,7 +144,10 @@ function App() {
         <div className="three-day-container">
           <ThreeDays />
         </div>
+        </>
+        )}
       </div>
+{/* Move feedback to the bottom */}
       <div className="feedback">
         <button onClick={sendEmail}>Feedback</button>
       </div>
