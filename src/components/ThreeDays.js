@@ -7,11 +7,6 @@ export default function ThreeDays() {
       <div className="three-day">
         <div className="day">
           <h3>Monday</h3>
-          <div className="rating">
-            <p>
-              <b>Surf rating:</b> 3/5
-            </p>
-          </div>
           <div className="condition">
             <p>
               <b>Wave height:</b> 1.2 - 1.5 m
@@ -36,11 +31,6 @@ export default function ThreeDays() {
         </div>
         <div className="day">
           <h3>Tuesday</h3>
-          <div className="rating">
-            <p>
-              <b>Surf rating:</b> 2/5
-            </p>
-          </div>
           <div className="condition">
             <p>
               <b>Wave height:</b> 1 - 1.2 m
@@ -65,11 +55,6 @@ export default function ThreeDays() {
         </div>
         <div className="day">
           <h3>Wednesday</h3>
-          <div className="rating">
-            <p>
-              <b>Surf rating:</b> 5/5
-            </p>
-          </div>
           <div className="condition">
             <p>
               <b>Wave height:</b> 1.8 - 2.2 m

@@ -13,12 +13,15 @@ const endpoint = "https://api.stormglass.io/v2/weather/point";
 
 function App() {
   const [location, setLocation] = useState("");
-  const [data, setData] = useState({});
+  // const [data, setData] = useState({});
   const [searchString, setsearchString] = useState("");
-  const [searchLat, setsearchLat] = useState("");
-  const [searchLong, setsearchLong] = useState("");
+  // const [searchLat, setsearchLat] = useState("");
+  // const [searchLong, setsearchLong] = useState("");
+  const [waveData, setwaveData] = useState([]);
   const [tempData, settempData] = useState([]);
-  const [favourites, setFavourites] = useState(JSON.parse(localStorage.getItem('favourites')) || []);
+  const [favourites, setFavourites] = useState(
+    JSON.parse(localStorage.getItem("favourites")) || []
+  );
 
   const sendEmail = () => {
     const confirmed = window.confirm("Open email client to email developer?");
@@ -32,18 +35,18 @@ function App() {
     if (!favourites.includes(location)) {
       // If not, add it
       const newFavourites = [...favourites, location];
-  
+
       // But check if there are already three favorites
       if (newFavourites.length > 3) {
         // If so, remove the first element from the array
         newFavourites.shift();
       }
-  
+
       // Update state
       setFavourites(newFavourites);
-  
+
       // Update localStorage
-      localStorage.setItem('favourites', JSON.stringify(newFavourites));
+      localStorage.setItem("favourites", JSON.stringify(newFavourites));
     }
   }
 
@@ -53,32 +56,25 @@ function App() {
 
   async function geocoding() {
     // I pass my partner a search term string and he returns a pair of lat/long coords
-    if (location) {
-      await axios
-        .get(`https://mapbox-api.onrender.com/get/${location}`)
-        .then((response) => {
-          console.log(response.data);
-          setsearchString(response.data.text);
-          setsearchLong(response.data.center[0]);
-          setsearchLat(response.data.center[1]);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    try {
+      if (location) {
+        const response = await axios.get(
+          `https://mapbox-api.onrender.com/get/${location}`
+        );
+        console.log(response.data);
+        setsearchString(response.data.text);
+        // setsearchLong(response.data.center[0]);
+        // setsearchLat(response.data.center[1]);
+        callStormglass(response.data.center[1], response.data.center[0]);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
-  useEffect(() => {
-    if (searchLat && searchLong) {
-      callStormglass(searchLat, searchLong);
-    }
-  }, [searchLat, searchLong]);
-
   async function callStormglass(searchLat, searchLong) {
-    console.log(searchLat);
-    console.log(searchLong);
-    axios
-      .get(endpoint, {
+    try {
+      const response = await axios.get(endpoint, {
         params: {
           lat: searchLat,
           lng: searchLong,
@@ -87,22 +83,43 @@ function App() {
         headers: {
           Authorization: apiKey,
         },
-      })
-      .then((response) => {
-        console.log(response.data);
-        const temperatures = extractTemperatures(response.data.hours);
-        setData(temperatures);
-      })
-      .catch((error) => {
-        console.log(error);
       });
+      const temperatures = await extractTemperatures(response.data.hours);
+      const waves = await extractWaves(response.data.hours);
+      settempData(temperatures);
+      setwaveData(waves);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  function extractTemperatures(hours) {
+  async function extractWaves(hours) {
+    const currentDate = new Date().toISOString().split("T")[0];
+
     return hours
       .filter((hour) => {
         const date = new Date(hour.time);
-        return date.getUTCHours() === 15;
+        const hourDate = date.toISOString().split("T")[0];
+        return hourDate === currentDate && date.getUTCHours() === 15;
+      })
+      .map((hour) => {
+        return {
+          time: hour.time,
+          waveHeight: hour.waveHeight,
+          windSpeed: hour.windSpeed,
+        };
+      });
+  }
+
+  async function extractTemperatures(hours) {
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    return hours
+      .filter((hour) => {
+        const date = new Date(hour.time);
+        const hourDate = date.toISOString().split("T")[0];
+        return hourDate === currentDate && date.getUTCHours() === 15;
       })
       .map((hour) => {
         return {
@@ -112,6 +129,11 @@ function App() {
         };
       });
   }
+
+  useEffect(() => {
+    console.log(tempData[0]);
+    console.log(waveData[0]);
+  }, [tempData]);
 
   return (
     <div className="app">
@@ -126,28 +148,28 @@ function App() {
         <div className="faves">
           <Faves />
         </div>
-        {location && (
-        <>
-        <div className="top">
-          <div className="location">
-            <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
-            <h1>{searchString}</h1>
-            <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
-            <p id="temp">{tempData[2]}</p>
-            <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
-            <p id="temp">{tempData[1]}</p>
-          </div>
-        </div>
-        <div className="current-cond-container">
-          <CurrentConditions />
-        </div>
-        <div className="three-day-container">
-          <ThreeDays />
-        </div>
-        </>
+        {tempData.length > 0 && waveData.length > 0 && searchString && (
+          <>
+            <div className="top">
+              <div className="location">
+                <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
+                <h1>{searchString}</h1>
+                <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
+                <p id="temp">{tempData[0].waterTemperature.sg}</p>
+                <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
+                <p id="temp">{tempData[0].airTemperature.sg}</p>
+              </div>
+            </div>
+            <div className="current-cond-container">
+              <CurrentConditions />
+            </div>
+            <div className="three-day-container">
+              <ThreeDays />
+            </div>
+          </>
         )}
       </div>
-{/* Move feedback to the bottom */}
+      {/* Move feedback to the bottom */}
       <div className="feedback">
         <button onClick={sendEmail}>Feedback</button>
       </div>

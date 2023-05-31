@@ -5,11 +5,6 @@ export default function CurrentConditions() {
     <>
       <h2>Current Conditions</h2>
       <div className="current-conditions">
-        <div className="rating">
-          <p>
-            <b>Surf rating:</b> 3/5
-          </p>
-        </div>
         <div className="condition">
           <p>
             <b>Wave height:</b> 1.2 - 1.5 m
