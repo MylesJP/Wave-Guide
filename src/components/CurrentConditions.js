@@ -1,18 +1,18 @@
 import React from "react";
 
-export default function CurrentConditions() {
+export default function CurrentConditions(props) {
   return (
     <>
       <h2>Current Conditions</h2>
       <div className="current-conditions">
         <div className="condition">
           <p>
-            <b>Wave height:</b> 1.2 - 1.5 m
+            <b>Wave height:</b> {props.waveData[0].waveHeight.noaa} m
           </p>
         </div>
         <div className="condition">
           <p>
-            <b>Wind speed:</b> 25 - 35 km/h SE
+            <b>Wind speed:</b> {Math.round(props.waveData[0].windSpeed.noaa*3.6)} km/h
           </p>
         </div>
         <div className="condition">

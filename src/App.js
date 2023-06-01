@@ -74,11 +74,16 @@ function App() {
 
   async function callStormglass(searchLat, searchLong) {
     try {
+      const endDate = new Date()
+      const currentDate = new Date()
+      endDate.setDate(currentDate.getDate() + 3)
+      const endDateString = endDate.toISOString().split('T')[0]
       const response = await axios.get(endpoint, {
         params: {
           lat: searchLat,
           lng: searchLong,
           params: "windSpeed,airTemperature,waterTemperature,waveHeight",
+          end: endDateString
         },
         headers: {
           Authorization: apiKey,
@@ -96,12 +101,11 @@ function App() {
 
   async function extractWaves(hours) {
     const currentDate = new Date().toISOString().split("T")[0];
-
     return hours
       .filter((hour) => {
         const date = new Date(hour.time);
         const hourDate = date.toISOString().split("T")[0];
-        return hourDate === currentDate && date.getUTCHours() === 15;
+        return hourDate === currentDate && date.getUTCHours() === 22;
       })
       .map((hour) => {
         return {
@@ -114,12 +118,11 @@ function App() {
 
   async function extractTemperatures(hours) {
     const currentDate = new Date().toISOString().split("T")[0];
-
     return hours
       .filter((hour) => {
         const date = new Date(hour.time);
         const hourDate = date.toISOString().split("T")[0];
-        return hourDate === currentDate && date.getUTCHours() === 15;
+        return hourDate === currentDate && date.getUTCHours() === 22;  // 22:00 UTC is 3pm PST
       })
       .map((hour) => {
         return {
@@ -133,7 +136,7 @@ function App() {
   useEffect(() => {
     console.log(tempData[0]);
     console.log(waveData[0]);
-  }, [tempData]);
+  }, [tempData, waveData]);
 
   return (
     <div className="app">
@@ -154,14 +157,15 @@ function App() {
               <div className="location">
                 <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
                 <h1>{searchString}</h1>
+                <br/>
                 <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
-                <p id="temp">{tempData[0].waterTemperature.sg}</p>
+                <p id="temp">{Math.round(tempData[0].waterTemperature.sg)}°C</p>
                 <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
-                <p id="temp">{tempData[0].airTemperature.sg}</p>
+                <p id="temp">{Math.round(tempData[0].airTemperature.sg)}°C</p>
               </div>
             </div>
             <div className="current-cond-container">
-              <CurrentConditions />
+              <CurrentConditions waveData={waveData}/>
             </div>
             <div className="three-day-container">
               <ThreeDays />
