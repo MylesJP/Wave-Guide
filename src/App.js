@@ -1,28 +1,36 @@
-import SearchBar from "./components/SearchBar";
-import Faves from "./components/Faves";
-import ThreeDays from "./components/ThreeDays";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faWater, faWind } from "@fortawesome/free-solid-svg-icons";
+import SearchBar from "./components/SearchBar";
+import Faves from "./components/Faves";
+import ThreeDays from "./components/ThreeDays";
 import CurrentConditions from "./components/CurrentConditions";
 import axios from "axios";
 
 const apiKey = process.env.REACT_APP_STORMGLASS_API_KEY;
 const waveEndpoint = "https://api.stormglass.io/v2/weather/point";
-const tideEndpoint = "https://api.stormglass.io/v2/tide/extremes/point"
+const tideEndpoint = "https://api.stormglass.io/v2/tide/extremes/point";
 
 function App() {
+  const [userInput, setUserInput] = useState("");
   const [location, setLocation] = useState("");
   const [searchString, setsearchString] = useState("");
-  // const [searchLat, setsearchLat] = useState("");
-  // const [searchLong, setsearchLong] = useState("");
   const [waveData, setwaveData] = useState([]);
   const [tideData, settideData] = useState([]);
   const [tempData, settempData] = useState([]);
+  const [threeDayForecast, setThreeDayForecast] = useState([]);
   const [favourites, setFavourites] = useState(
     JSON.parse(localStorage.getItem("favourites")) || []
   );
+
+  useEffect(() => {
+    if (location) {
+      geocoding();
+      setUserInput("");
+      console.log(location);
+    }
+  }, [location]);
 
   const sendEmail = () => {
     const confirmed = window.confirm("Open email client to email developer?");
@@ -32,27 +40,16 @@ function App() {
   };
 
   function addToFavourites() {
-    // Check if location is already in favorites
     if (!favourites.includes(location)) {
-      // If not, add it
       const newFavourites = [...favourites, location];
 
-      // But check if there are already three favorites
       if (newFavourites.length > 3) {
-        // If so, remove the first element from the array
         newFavourites.shift();
       }
-
-      // Update state
       setFavourites(newFavourites);
-
       // Update localStorage
       localStorage.setItem("favourites", JSON.stringify(newFavourites));
     }
-  }
-
-  async function clickFunctions() {
-    await geocoding();
   }
 
   async function geocoding() {
@@ -62,12 +59,9 @@ function App() {
         const response = await axios.get(
           `https://mapbox-api.onrender.com/get/${location}`
         );
-        console.log(response.data);
         setsearchString(response.data.text);
-        // setsearchLong(response.data.center[0]);
-        // setsearchLat(response.data.center[1]);
         getWaveData(response.data.center[1], response.data.center[0]);
-        getTideData(response.data.center[1], response.data.center[0])
+        getTideData(response.data.center[1], response.data.center[0]);
       }
     } catch (error) {
       console.log(error);
@@ -76,60 +70,88 @@ function App() {
 
   async function getWaveData(searchLat, searchLong) {
     try {
-      const endDate = new Date()
-      const currentDate = new Date()
-      endDate.setDate(currentDate.getDate() + 3)
-      const endDateString = endDate.toISOString().split('T')[0]
+      const endDate = new Date();
+      const currentDate = new Date();
+      endDate.setDate(currentDate.getDate() + 4);
+      const endDateString = endDate.toISOString().split("T")[0];
       const response = await axios.get(waveEndpoint, {
         params: {
           lat: searchLat,
           lng: searchLong,
           params: "windSpeed,airTemperature,waterTemperature,waveHeight",
-          end: endDateString
+          end: endDateString,
         },
         headers: {
           Authorization: apiKey,
         },
       });
-      const temperatures = await extractTemperatures(response.data.hours);
-      const waves = await extractWaves(response.data.hours);
-      settempData(temperatures);
-      setwaveData(waves);
-      console.log(response.data);
+
+      const threeDayForecast = calculateThreeDayForecast(response.data.hours);
+      setThreeDayForecast(threeDayForecast);
+      settempData(await extractTemperatures(response.data.hours));
+      setwaveData(await extractWaves(response.data.hours));
     } catch (error) {
       console.log(error);
     }
   }
 
-  async function getTideData(searchLat, searchLong){
+  function calculateThreeDayForecast(hoursData) {
+    return [1, 2, 3].map((day) => {
+      const startDay = new Date();
+      startDay.setUTCDate(startDay.getUTCDate() + day);
+      startDay.setUTCHours(0, 0, 0, 0); // Start of the day
+      const endDay = new Date(startDay);
+      endDay.setUTCDate(endDay.getUTCDate() + 1);
+      endDay.setUTCHours(23, 59, 59, 999); // End of the day
+      const dayData = hoursData.filter((hour) => {
+        const hourDate = new Date(hour.time);
+        return hourDate >= startDay && hourDate < endDay;
+      });
+
+      const waveHeightMax = Math.max(...dayData.map((d) => d.waveHeight?.sg || 0));
+      const windSpeedMax = Math.max(...dayData.map((d) => d.windSpeed?.sg || 0));
+
+      return {
+        day: startDay.toLocaleDateString("en-US", { weekday: "long" }),
+        waveHeightMax,
+        windSpeedMax,
+      };
+    });
+  }
+
+  async function getTideData(searchLat, searchLong) {
     try {
-      const endDate = new Date()
-      const currentDate = new Date()
-      endDate.setDate(currentDate.getDate() + 3)
-      const endDateString = endDate.toISOString().split('T')[0]
+      const currentDate = new Date();
+      const utcDate = new Date(
+        currentDate.getTime() + currentDate.getTimezoneOffset() * 60000
+      );
+      const pstDateInUTC = new Date(utcDate.getTime() - 7 * 60 * 60 * 1000);
+      const startDateString = pstDateInUTC.toISOString();
       const response = await axios.get(tideEndpoint, {
         params: {
           lat: searchLat,
           lng: searchLong,
-          params: "tide",
-          end: endDateString
+          start: startDateString,
         },
         headers: {
           Authorization: apiKey,
         },
-      }); 
+      });
       const jsonData = response.data;
-      console.log(response.data)
+      const futureTideEvents = jsonData.data
+        .filter((event) => new Date(event.time) > currentDate)
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
 
-      const highTide = jsonData.data.find(event => event.type === 'high');
-      const lowTide = jsonData.data.find(event => event.type === 'low');
-      console.log(`high tide: ${highTide?.time}`)
-      console.log(`low tide: ${lowTide?.time}`)
-
+      const nextTideEvent = futureTideEvents[0]; // The nearest tide event in the future
+      settideData({
+        nextTide: nextTideEvent?.time,
+        nextTideHeight: nextTideEvent?.height,
+        nextTideType: nextTideEvent?.type, // high or low
+      });
     } catch (error) {
       console.error(`Failed to fetch tide times: ${error.message}`);
     }
-  };
+  }
 
   async function extractWaves(hours) {
     const currentDate = new Date().toISOString().split("T")[0];
@@ -154,7 +176,7 @@ function App() {
       .filter((hour) => {
         const date = new Date(hour.time);
         const hourDate = date.toISOString().split("T")[0];
-        return hourDate === currentDate && date.getUTCHours() === 22;  // 22:00 UTC is 3pm PST
+        return hourDate === currentDate && date.getUTCHours() === 22; // 22:00 UTC is 3pm PST
       })
       .map((hour) => {
         return {
@@ -165,11 +187,6 @@ function App() {
       });
   }
 
-  useEffect(() => {
-    // console.log(tempData[0]);
-    // console.log(waveData[0]);
-  }, [tempData, waveData]);
-
   return (
     <div className="app">
       <div className="container">
@@ -177,19 +194,26 @@ function App() {
           <SearchBar
             location={location}
             setLocation={setLocation}
-            clickFunctions={clickFunctions}
+            userInput={userInput}
+            setUserInput={setUserInput}
           />
         </div>
         <div className="faves">
-          <Faves />
+          <Faves setLocation={setLocation} />
         </div>
         {tempData.length > 0 && waveData.length > 0 && searchString && (
           <>
             <div className="top">
               <div className="location">
-                <FontAwesomeIcon icon={faHeart} size="lg" style={{ color: "#ffffff" }} />
-                <h1>{searchString}</h1>
-                <br/>
+                <div className="faves" onClick={addToFavourites}>
+                  <FontAwesomeIcon
+                    icon={faHeart}
+                    size="lg"
+                    style={{ color: "#ffffff" }}
+                  />
+                  <h1>{searchString}</h1>
+                </div>
+                <br />
                 <FontAwesomeIcon icon={faWater} style={{ color: "#ffffff" }} />
                 <p id="temp">{Math.round(tempData[0].waterTemperature.sg)}°C</p>
                 <FontAwesomeIcon icon={faWind} style={{ color: "#ffffff" }} />
@@ -197,15 +221,14 @@ function App() {
               </div>
             </div>
             <div className="current-cond-container">
-              <CurrentConditions waveData={waveData}/>
+              <CurrentConditions waveData={waveData} tideData={tideData} />
             </div>
             <div className="three-day-container">
-              <ThreeDays />
+              <ThreeDays forecasts={threeDayForecast} />
             </div>
           </>
         )}
       </div>
-      {/* Move feedback to the bottom */}
       <div className="feedback">
         <button onClick={sendEmail}>Feedback</button>
       </div>

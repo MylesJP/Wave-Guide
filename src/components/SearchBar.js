@@ -1,26 +1,26 @@
 import React from "react";
 
-export default function SearchBar({ location, setLocation, clickFunctions }) {
-  const shouldDisplayClear = location.length > 0;
+export default function SearchBar({ setLocation, userInput, setUserInput }) {
+  const shouldDisplayClear = userInput.length > 0;
 
   const searchOnEnter = (event) => {
     if (event.key === "Enter") {
-      clickFunctions();
+      setLocation(userInput);
     }
   };
 
   return (
     <>
-      <div className="fa fa-search" onClick={clickFunctions}></div>
+      <div className="fa fa-search" onClick={() => setLocation(userInput)}></div>
       <input
-        value={location}
+        value={userInput}
         type="text"
-        onKeyDown={searchOnEnter}
-        onChange={(event) => setLocation(event.target.value)}
+        onKeyPress={searchOnEnter}
+        onChange={(event) => setUserInput(event.target.value)}
         placeholder="Enter beach"
       />
       {shouldDisplayClear && (
-        <div className="fa fa-times" onClick={() => setLocation("")}></div>
+        <div className="fa fa-times" onClick={() => setUserInput("")}></div>
       )}
     </>
   );
