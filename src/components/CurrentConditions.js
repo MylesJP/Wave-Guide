@@ -7,7 +7,7 @@ export default function CurrentConditions(props) {
       <div className="current-conditions">
         <div className="condition">
           <p>
-            <b>Wave height:</b> {props.waveData[0].waveHeight.noaa} m
+            <b>Wave height:</b> {props.waveData[0].waveHeight.sg} m
           </p>
         </div>
         <div className="condition">

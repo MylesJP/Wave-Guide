@@ -9,15 +9,16 @@ import CurrentConditions from "./components/CurrentConditions";
 import axios from "axios";
 
 const apiKey = process.env.REACT_APP_STORMGLASS_API_KEY;
-const endpoint = "https://api.stormglass.io/v2/weather/point";
+const waveEndpoint = "https://api.stormglass.io/v2/weather/point";
+const tideEndpoint = "https://api.stormglass.io/v2/tide/extremes/point"
 
 function App() {
   const [location, setLocation] = useState("");
-  // const [data, setData] = useState({});
   const [searchString, setsearchString] = useState("");
   // const [searchLat, setsearchLat] = useState("");
   // const [searchLong, setsearchLong] = useState("");
   const [waveData, setwaveData] = useState([]);
+  const [tideData, settideData] = useState([]);
   const [tempData, settempData] = useState([]);
   const [favourites, setFavourites] = useState(
     JSON.parse(localStorage.getItem("favourites")) || []
@@ -65,20 +66,21 @@ function App() {
         setsearchString(response.data.text);
         // setsearchLong(response.data.center[0]);
         // setsearchLat(response.data.center[1]);
-        callStormglass(response.data.center[1], response.data.center[0]);
+        getWaveData(response.data.center[1], response.data.center[0]);
+        getTideData(response.data.center[1], response.data.center[0])
       }
     } catch (error) {
       console.log(error);
     }
   }
 
-  async function callStormglass(searchLat, searchLong) {
+  async function getWaveData(searchLat, searchLong) {
     try {
       const endDate = new Date()
       const currentDate = new Date()
       endDate.setDate(currentDate.getDate() + 3)
       const endDateString = endDate.toISOString().split('T')[0]
-      const response = await axios.get(endpoint, {
+      const response = await axios.get(waveEndpoint, {
         params: {
           lat: searchLat,
           lng: searchLong,
@@ -98,6 +100,36 @@ function App() {
       console.log(error);
     }
   }
+
+  async function getTideData(searchLat, searchLong){
+    try {
+      const endDate = new Date()
+      const currentDate = new Date()
+      endDate.setDate(currentDate.getDate() + 3)
+      const endDateString = endDate.toISOString().split('T')[0]
+      const response = await axios.get(tideEndpoint, {
+        params: {
+          lat: searchLat,
+          lng: searchLong,
+          params: "tide",
+          end: endDateString
+        },
+        headers: {
+          Authorization: apiKey,
+        },
+      }); 
+      const jsonData = response.data;
+      console.log(response.data)
+
+      const highTide = jsonData.data.find(event => event.type === 'high');
+      const lowTide = jsonData.data.find(event => event.type === 'low');
+      console.log(`high tide: ${highTide?.time}`)
+      console.log(`low tide: ${lowTide?.time}`)
+
+    } catch (error) {
+      console.error(`Failed to fetch tide times: ${error.message}`);
+    }
+  };
 
   async function extractWaves(hours) {
     const currentDate = new Date().toISOString().split("T")[0];
@@ -134,8 +166,8 @@ function App() {
   }
 
   useEffect(() => {
-    console.log(tempData[0]);
-    console.log(waveData[0]);
+    // console.log(tempData[0]);
+    // console.log(waveData[0]);
   }, [tempData, waveData]);
 
   return (
