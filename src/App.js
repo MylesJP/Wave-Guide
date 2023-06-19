@@ -8,7 +8,8 @@ import ThreeDays from "./components/ThreeDays";
 import CurrentConditions from "./components/CurrentConditions";
 import axios from "axios";
 
-const apiKey = process.env.REACT_APP_STORMGLASS_API_KEY;
+const stormglassAPIKey = process.env.REACT_APP_STORMGLASS_API_KEY;
+const mapboxAPIKey = process.env.REACT_APP_MAPBOX_API_KEY;
 const waveEndpoint = "https://api.stormglass.io/v2/weather/point";
 const tideEndpoint = "https://api.stormglass.io/v2/tide/extremes/point";
 
@@ -53,15 +54,20 @@ function App() {
   }
 
   async function geocoding() {
-    // I pass my partner a search term string and he returns a pair of lat/long coords
     try {
       if (location) {
         const response = await axios.get(
-          `https://mapbox-api.onrender.com/get/${location}`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${mapboxAPIKey}`
         );
-        setsearchString(response.data.text);
-        getWaveData(response.data.center[1], response.data.center[0]);
-        getTideData(response.data.center[1], response.data.center[0]);
+        setsearchString(response.data.features[0].text);
+        getWaveData(
+          response.data.features[0].center[1],
+          response.data.features[0].center[0]
+        );
+        getTideData(
+          response.data.features[0].center[1],
+          response.data.features[0].center[0]
+        );
       }
     } catch (error) {
       console.log(error);
@@ -82,7 +88,7 @@ function App() {
           end: endDateString,
         },
         headers: {
-          Authorization: apiKey,
+          Authorization: stormglassAPIKey,
         },
       });
 
@@ -134,7 +140,7 @@ function App() {
           start: startDateString,
         },
         headers: {
-          Authorization: apiKey,
+          Authorization: stormglassAPIKey,
         },
       });
       const jsonData = response.data;
